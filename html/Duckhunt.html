@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duck Hunt Game</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background-color: skyblue;
+    }
+
+    #gameCanvas {
+      display: block;
+    }
+
+    .duck {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      background-image: url('https://i.imgur.com/oJbVvWj.png'); /* Duck sprite */
+      background-size: cover;
+      cursor: pointer;
+    }
+
+    #score {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      color: white;
+      text-shadow: 2px 2px 4px black;
+    }
+
+    #gameOver {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 36px;
+      color: white;
+      text-shadow: 2px 2px 4px black;
+      text-align: center;
+    }
+
+    .dog {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 150px;
+      background-image: url('https://i.imgur.com/WQSKaPz.png'); /* Dog with shotgun */
+      background-size: cover;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+  <div id="score">Score: 0</div>
+  <div id="gameOver">Game Over<br><button onclick="restartGame()">Restart</button></div>
+  <div class="dog"></div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let score = 0;
+    let ducks = [];
+    let gameRunning = true;
+
+    function createDuck() {
+      const duck = document.createElement("div");
+      duck.className = "duck";
+      duck.style.left = Math.random() * (window.innerWidth - 70) + "px";
+      duck.style.top = Math.random() * (window.innerHeight - 300) + "px"; // Avoid bottom area
+
+      document.body.appendChild(duck);
+      ducks.push(duck);
+
+      setTimeout(() => {
+        if (gameRunning) {
+          duck.remove();
+          ducks.splice(ducks.indexOf(duck), 1);
+          checkGameOver();
+        }
+      }, 2000); // Ducks disappear after 2 seconds
+    }
+
+    function updateScore() {
+      document.getElementById("score").innerText = "Score: " + score;
+    }
+
+    function checkGameOver() {
+      if (ducks.length === 0 && !gameRunning) {
+        document.getElementById("gameOver").style.display = "block";
+      }
+    }
+
+    function restartGame() {
+      document.getElementById("gameOver").style.display = "none";
+      score = 0;
+      updateScore();
+      gameRunning = true;
+      gameLoop();
+    }
+
+    function gameLoop() {
+      if (!gameRunning) return;
+
+      if (Math.random() < 0.2) { // Ducks appear more frequently
+        createDuck();
+      }
+
+      setTimeout(gameLoop, 500); // Repeat game loop every 0.5 seconds
+    }
+
+    document.body.addEventListener("click", (e) => {
+      if (e.target.classList.contains("duck")) {
+        e.target.remove();
+        ducks.splice(ducks.indexOf(e.target), 1);
+        score += 10;
+        updateScore();
+      }
+    });
+
+    // Start the game
+    gameLoop();
+  </script>
+</body>
+</html>
